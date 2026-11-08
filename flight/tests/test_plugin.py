@@ -9,19 +9,21 @@ def aircraft(**values):
     row.update(values);return row
 
 class Host:
-    def __init__(self,network=True,config=None):
+    def __init__(self,network=True,config=None,media=True):
         self.lua=LuaRuntime(unpack_returned_tuples=True,register_eval=False,register_builtins=False)
-        self.labels={};self.requests=[];self.cancelled=[]
+        self.labels={};self.requests=[];self.cancelled=[];self.maps=[]
         globals=self.lua.globals()
         globals._widget=lambda spec:self.labels.update({spec['id']:spec['text']})
         globals._text=lambda id,text:self.labels.update({id:text})
         globals._request=self.request
         globals._cancel=lambda id:self.cancelled.append(id)
+        globals._map=lambda spec:self.maps.append(spec) or True
         self.ctx=self.lua.execute("""return {ui={page=function(spec) end,
             label=function(spec) _widget(spec) end,button=function(spec) _widget(spec) end,
-            set_text=function(id,text) _text(id,text) end},
+            set_text=function(id,text) _text(id,text) end,flight_map=function(spec) return _map(spec) end},
             http={request=function(spec) return _request(spec) end,cancel=function(id) _cancel(id) end}}""")
         if not network:self.ctx.http=None
+        if not media:self.ctx.ui.flight_map=None
         self.ctx.config=self.convert(config or {'language':'en'})
         self.plugin=self.lua.execute((ROOT/'main.lua').read_text());self.plugin.create(self.ctx);self.plugin.show(self.ctx)
 
@@ -83,5 +85,21 @@ class FlightPluginTests(unittest.TestCase):
         h=Host();h.event('http',id=1,tag=h.requests[-1]['tag'],status=200,json={})
         self.assertIn('Invalid',h.labels['status'])
         h=Host();h.answer([aircraft()]*81);self.assertIn('Invalid',h.labels['status'])
+    def test_map_uses_filtered_positions_and_does_not_fetch_tiles_in_lua(self):
+        h=Host();h.answer([aircraft(flight='SAS123'),aircraft(hex='bad!')])
+        view=h.maps[-1];self.assertEqual(view['selected'],'abc123');self.assertEqual(view['airline_icao'],'SAS')
+        self.assertEqual(len(view['points']),1);self.assertEqual(view['points'][1]['lat'],55.68)
+        self.assertEqual(len(h.requests),1);self.assertTrue(h.requests[0]['url'].startswith('https://opendata.adsb.fi/'))
+    def test_touch_selection_changes_aircraft_and_airline_without_new_http_request(self):
+        h=Host();h.answer([aircraft(flight='SAS123'),aircraft(hex='def456',flight='RYR42',lat=55.69)])
+        h.event('select:def456');self.assertEqual(h.maps[-1]['selected'],'def456');self.assertEqual(h.maps[-1]['airline_icao'],'RYR')
+        self.assertEqual(len(h.requests),1);h.event('select:unknown');self.assertEqual(h.maps[-1]['selected'],'def456')
+    def test_unidentified_aircraft_do_not_invent_airlines_and_missing_media_is_explicit(self):
+        for call in ('N123AB','OYABC','ABC','http://bad','12345'):
+            h=Host();h.answer([aircraft(flight=call)]);self.assertEqual(h.maps[-1]['airline_icao'],'')
+        h=Host(media=False);h.answer();self.assertIn('Map/logos need a compatible core',h.labels['status'])
+    def test_map_preserves_age_on_error_and_never_uses_hidden_callbacks(self):
+        h=Host();h.answer();h.event('tick',now_ms=70000);self.assertEqual(h.maps[-1]['age_seconds'],70)
+        before=len(h.maps);h.plugin.hide(h.ctx);h.event('tick',now_ms=80000);self.assertEqual(len(h.maps),before)
 
 if __name__=='__main__':unittest.main()

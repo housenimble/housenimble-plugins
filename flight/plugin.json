@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "id": "housenimble.flight",
   "name": "Flight · fly i nærheden",
-  "description": "Live fly i nærheden fra adsb.fi: afstand, højde, fart og retning. Selvstændig Lua-side med afgrænset læseadgang gennem privat core.",
-  "version": "0.1.0",
+  "description": "Live fly med interaktivt kort, valg af fly og flyselskabslogoer. Core håndterer afgrænset HTTPS, PNG-visning og cache.",
+  "version": "0.2.0",
   "apiVersion": 1,
   "runtime": "lua-5.4",
   "entry": "main.lua",
@@ -13,7 +13,9 @@
   ],
   "permissions": {
     "network": [
-      "https://opendata.adsb.fi"
+      "https://opendata.adsb.fi",
+      "https://tile.openstreetmap.org",
+      "https://raw.githubusercontent.com"
     ],
     "mqttSubscribe": [],
     "mqttPublish": [],

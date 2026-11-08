@@ -1,6 +1,6 @@
 # HouseNimble plugins · setup til næste AI-session
 
-Statusdato: **2026-10-26**. Offentlig dokumentation uden core-implementation,
+Statusdato: **2026-11-09**. Offentlig dokumentation uden core-implementation,
 credentials eller private enhedsdata. Commitreferencer er funktionelle milepæle
 før denne dokumentationsopdatering, ikke et løfte om nuværende HEAD eller release.
 
@@ -8,8 +8,8 @@ før denne dokumentationsopdatering, ikke et løfte om nuværende HEAD eller rel
 
 | Repository | Formål |
 | --- | --- |
-| `pulsejets/housenimble-core` | Fortrolig core; altid privat, aldrig kopieret hertil |
-| `pulsejets/housenimble-plugins` | Dette offentlige katalog, plugins og SDK |
+| `housenimble/housenimble-core` | Fortrolig core; altid privat, aldrig kopieret hertil |
+| `housenimble/housenimble-plugins` | Dette offentlige katalog, plugins og SDK |
 | `housenimble/HouseNimble` | Hjemmesiden housenimble.com, opsætninger og katalogvisning |
 
 Pluginudvikleren skal kun behøve dette repo og en enhed med en separat,
@@ -63,7 +63,7 @@ betyder ikke, at deres tilsvarende offentlige Lua-plugin er implementeret.
 ## Parallelle feature-branches — vigtigt
 
 - `codex/lua-device-test`, milepæl `6573bfb`, er uploadet; draft-PR
-  https://github.com/pulsejets/housenimble-plugins/pull/1 til `dev`.
+  https://github.com/housenimble/housenimble-plugins/pull/1 til `dev`.
   Her findes den faktiske Python/USB-klient og dokumenteret første counter-smoke.
 - `codex/plugin-categories`, milepæl `4b4ff70`, blev oprettet fra `origin/dev`
   for kun at ændre katalogmetadata. Kategoriændringen var endnu ikke push'et.
@@ -169,3 +169,16 @@ Et isoleret, autentificeret webbyggejob kørte den rigtige private PlatformIO-
 compiler med Counter + Flight, og det færdige fire-dels manifest blev valideret
 uden NVS-overlap. Ingen fysisk skærm/aktiv database/container blev ændret.
 Docker-imageverifikation er separat og må ikke mærkes bestået før faktisk exit0.
+
+## Flight 0.2 · 2026-11-09
+
+`codex/flight-plugin` fortsætter den eksisterende offentlige SDK-feature.
+Kort, flyvalg og ICAO-logoer bruger den offentlige `ctx.ui.flight_map`-kontrakt
+og kræver `flightMedia=1` samt `httpFlight=true`; klienter afviser før parring.
+De tre præcise origins udvider ikke Lua-HTTP til vilkårlige billedrequests.
+Kort kræver cachelager uden formatering. Logoassets er ikke pakket/distribueret.
+17 Flight-tests og de offentlige regressionschecks består lokalt. Private
+softwaretests bruger samme Lua med syntetiske billeder; fysisk test mangler.
+`catalog.json` forbliver draft/ikke installerbar indtil test og promotion.
+Ejeren har givet stående tilladelse til normale featurepushes/PR'er, indtil
+tilbagekaldelse; merge, deploy og USB-installation kræver fortsat særskilt accept.

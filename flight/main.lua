@@ -36,13 +36,29 @@ local function age()
     if state.fetched==nil then return nil end
     return math.max(0,math.floor((state.now-state.fetched)/1000))
 end
+local function airline(callsign)
+    if type(callsign)~="string" or #callsign<4 then return "" end
+    local code=string.upper(string.sub(callsign,1,3))
+    for i=1,3 do local c=string.byte(code,i);if c<65 or c>90 then return "" end end
+    local digit=string.byte(callsign,4);if digit<48 or digit>57 then return "" end
+    return code
+end
+local function map(ctx)
+    if type(ctx.ui.flight_map)~="function" then state.media_error=true;return end
+    local selected=state.aircraft[state.cursor]
+    state.media_error=not ctx.ui.flight_map({id="aircraft-map",latitude=state.lat,longitude=state.lon,radius_km=state.radius,
+        points=state.aircraft,selected=selected and selected.hex or "",airline_icao=selected and airline(selected.callsign) or "",
+        age_seconds=math.min(age() or 0,604800),language=state.english and "en" or "da"})
+end
 local function render(ctx)
     if not state.visible or state.destroyed then return end
+    map(ctx)
     local elapsed=age()
     local status=state.message
     if elapsed then
         status=status..string.format(state.english and " · data age %ds" or " · data %ds gamle",elapsed)
     end
+    if state.media_error then status=status..(state.english and " · Map/logos need a compatible core" or " · Kort/logoer kræver en kompatibel core") end
     ctx.ui.set_text("status",status)
     ctx.ui.set_text("area",string.format("%.4f, %.4f · %.0f km · %d %s",state.lat,state.lon,state.radius,#state.aircraft,state.english and "aircraft" or "fly"))
     local start=math.floor((state.cursor-1)/3)*3+1
@@ -107,6 +123,7 @@ function plugin.create(ctx)
         maximum=math.floor(number(c.max_aircraft,1,80,30)),show_ground=c.show_ground==true,
         now=0,next=0,sequence=0,metric=true,aircraft={},cursor=1,message=""}
     ctx.ui.page({title=state.english and "Flight · nearby aircraft" or "Flight · fly i nærheden"})
+    map(ctx)
     for _,id in ipairs({"status","area","row1","row2","row3","details"}) do ctx.ui.label({id=id,text=" "}) end
     ctx.ui.label({id="attribution",text="Data: adsb.fi · https://adsb.fi/"})
     ctx.ui.button({id="previous",text=state.english and "Previous" or "Forrige",event="previous"})
@@ -155,7 +172,10 @@ function plugin.event(ctx,event)
     elseif event.name=="tick" or event.name=="refresh" then refresh(ctx)
     elseif event.name=="previous" then state.cursor=math.max(1,state.cursor-1)
     elseif event.name=="next" then state.cursor=math.max(1,math.min(#state.aircraft,state.cursor+1))
-    elseif event.name=="units" then state.metric=not state.metric end
+    elseif event.name=="units" then state.metric=not state.metric
+    elseif string.sub(event.name or "",1,7)=="select:" then
+        local id=hex(string.sub(event.name,8));if id then for i,a in ipairs(state.aircraft)do if a.hex==id then state.cursor=i;break end end end
+    end
     render(ctx)
 end
 return plugin

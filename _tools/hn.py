@@ -21,7 +21,7 @@ def device_subset(manifest,payload):
     if any(permissions[k] for k in ['mqttSubscribe','mqttPublish']):
         raise InvalidPlugin('Development API 1 does not grant MQTT capabilities yet')
     flight=manifest['id']=='housenimble.flight'
-    if (flight and permissions['network']!=['https://opendata.adsb.fi']) or (not flight and permissions['network']):
+    if (flight and permissions['network'] not in (['https://opendata.adsb.fi'],['https://opendata.adsb.fi','https://tile.openstreetmap.org','https://raw.githubusercontent.com'])) or (not flight and permissions['network']):
         raise InvalidPlugin('Only the explicit read-only Flight HTTP grant is supported; Spotify OAuth is not implemented')
     if permissions['storageBytes']>4096 or not 32768<=manifest['limits']['memoryBytes']<=262144 or manifest['limits']['instructionsPerCallback']<1000:
         raise InvalidPlugin('Development core supports 32–256 KiB Lua RAM, 1000–100000 instructions and up to 4 KiB storage')
@@ -62,12 +62,15 @@ def run_device(args, blob=None, manifest=None):
     paired=False
     try:
         initial=device.hello()
-        if manifest and args.config_values is not None and initial.get('capabilities',{}).get('settingsSchema')!=1:
+        capabilities=initial.get('capabilities') if isinstance(initial.get('capabilities'),dict) else {}
+        if manifest and args.config_values is not None and capabilities.get('settingsSchema')!=1:
             raise DeviceError('Install an owner-approved core with configuration schema 1 first')
-        if manifest and manifest['id']=='housenimble.flight' and (not isinstance(initial.get('capabilities'),dict) or initial['capabilities'].get('httpFlight') is not True):
+        if manifest and manifest['id']=='housenimble.flight' and capabilities.get('httpFlight') is not True:
             raise DeviceError('Install an owner-approved core with Flight HTTP support first; this core cannot run Flight')
+        if manifest and len(manifest['permissions']['network'])==3 and (type(capabilities.get('flightMedia')) is not int or capabilities['flightMedia']!=1):
+            raise DeviceError('Install an owner-approved core with Flight map/logo support (flightMedia 1) first')
         if args.command=='status':
-            safe={key:initial[key] for key in ['protocol','coreApi','development','build','buildId','active','plugin','memoryBytes','widgets','wifiConnected','received'] if key in initial}
+            safe={key:initial[key] for key in ['protocol','coreApi','development','build','buildId','active','plugin','memoryBytes','mediaBytes','widgets','wifiConnected','received'] if key in initial}
             print(json.dumps(safe,ensure_ascii=False,indent=2))
             return 0
         print('Tryk “USB · par enhed” på skærmen. Koden gælder i 60 sekunder.')

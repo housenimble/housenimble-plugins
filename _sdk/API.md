@@ -43,3 +43,9 @@ Redirects og DNS/IP-skift kontrolleres. MQTT-publicering kræver eksplicit topic
 Store moduler kræver kontrollerede host-funktioner: billed-/kortcache, medievisning,
 OAuth, discovery og midlertidig Wi-Fi-provisionering. Det er grunde til en
 trinvis portering; mapperne alene gør ikke nuværende C++-plugins isolerede.
+
+## Implementeret Flight-medieudvidelse · 2026-11-09
+
+`flightMedia=1` tilføjer kun den afgrænsede Flight-kortfunktion, ikke en generel
+billed-/fil-/HTTP-grant. Se [Flight-kontrakten](../flight/HOST-CONTRACT.md).
+Version 0.2 kræver en separat godkendt core-opdatering og ny fysisk test.

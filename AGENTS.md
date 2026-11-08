@@ -5,9 +5,9 @@ på dansk. Kontrollér branch, status og remote; docs kan høre til en anden bra
 
 ## Ansvar og grænser
 
-- Dette repo er `pulsejets/housenimble-plugins`: offentlige plugins, SDK,
+- Dette repo er `housenimble/housenimble-plugins`: offentlige plugins, SDK,
   katalogkonfiguration og den offentlige host-API. Den private implementering
-  hører til `pulsejets/housenimble-core`; hjemmesiden er `housenimble/HouseNimble`.
+  hører til `housenimble/housenimble-core`; hjemmesiden er `housenimble/HouseNimble`.
 - Kopiér aldrig core-kode, private headers, Git-historik, firmware/ELF/bin/map,
   core-fejldumps, credentials, signeringsnøgler eller private logs hertil.
 - Plugins er Lua-tekst og data gennem en versioneret, begrænset host-API.
@@ -25,9 +25,9 @@ på dansk. Kontrollér branch, status og remote; docs kan høre til en anden bra
 
 ## Git, test og godkendelser
 
-- Oplys repo, branch og mål, og spørg før ny push, publicering, serverdeploy,
-  enhedsupload eller ændring af synlighed. Genbrug konkret accept for samme
-  handling, men aldrig som generel fremtidig tilladelse.
+- Ejeren har givet stående tilladelse til normale featurepushes og PR'er indtil
+  tilbagekaldelse. Oplys repo, branch og PR-mål. Merge/promotion, serverdeploy,
+  enhedsupload og ændring af synlighed kræver fortsat særskilt accept.
 - Lokale rettelser, tests, dokumentation og lokale commits kan gennemføres.
 - Flow: `codex/...` fra `dev` → PR til `dev` → PR til `test` → PR til `main`.
   Ingen direkte produktionsgenvej, force-push eller sletning af miljøbranches.

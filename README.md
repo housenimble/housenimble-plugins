@@ -7,7 +7,7 @@ firmwarebinærer, private headers eller tidligere Git-historik**.
 **Aktuel status på `codex/flight-plugin`:** `counter/` kan valideres, pakkes og
 USB-testes med den ejerinstallerede udviklings-core. `flight/` er en faktisk Lua-
 side, softwareverificeret og klar til enhedstest med en **ny** core med
-`httpFlight`; den nye firmware er endnu ikke installeret. `spotify/` er en
+`httpFlight=true` og `flightMedia=1`; den nye firmware er endnu ikke installeret. `spotify/` er en
 prototype, der stadig mangler OAuth-/host-understøttelse. De øvrige 20 mapper er
 migrationsspecifikationer. Ingen af disse udsagn er produktionsgodkendelser.
 Se [AI-SETUP.md](AI-SETUP.md) om de forskellige feature-branches.
@@ -64,9 +64,9 @@ Sonos-grupper og covers er endnu ikke porteret. Den private kildeapp er urørt.
 
 [flight/](flight/README.md) er nu en faktisk Lua-side med live flyliste og
 begrænset GET-grant. USB-klienten på `codex/flight-plugin` kontrollerer
-`httpFlight` capability og accepterer validerede indstillinger via `--config`.
-Ny privat udviklings-core skal godkendes/installeres før fysisk test. Kortfliser,
-logoer og SD-billeder er ikke porteret. Spotify OAuth aktiveres ikke af Flight.
+`httpFlight=true` og `flightMedia=1` og accepterer validerede indstillinger via `--config`.
+Ny privat udviklings-core skal godkendes/installeres før fysisk test. Flight 0.2 har kort, flyvalg og ICAO-logoer gennem en afgrænset core-binding.
+Kort kræver skrivbart cachelager uden formatering. Spotify OAuth aktiveres ikke af Flight.
 
 
 ## Fælles udviklingsstandard

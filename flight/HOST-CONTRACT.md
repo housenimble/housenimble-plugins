@@ -38,3 +38,33 @@ Konfiguration kopieres til `ctx.config`, ikke en global database.
 
 Denne binding er **ikke** en fri HTTP/OAuth- eller Sonos-tjeneste. Spotify-pluginets
 krav til OAuth og player-skrivninger er fortsat ikke understøttet af denne Flight-grant.
+
+## Kort og logoer · flightMedia 1
+
+Version 0.2 kræver desuden heltals-capability `hello.capabilities.flightMedia=1`.
+Begge SDK-klienter afviser manglende/forkert version før parring og upload.
+Den tidligere Flight-grant med kun adsb.fi kan stadig anvendes af ældre listepakker.
+
+```lua
+ctx.ui.flight_map({
+  id="aircraft-map", latitude=55.6761, longitude=12.5683, radius_km=30,
+  selected="abc123", airline_icao="SAS", language="da", age_seconds=0,
+  points={{hex="abc123", callsign="SAS123", lat=55.68, lon=12.57, heading=90, seen=2}}
+})
+```
+
+Funktionen returnerer en boolsk værdi og opretter/opdaterer ét kort (én widget).
+Kun Flight med manifestets tre præcise origins i ovenstående rækkefølge får denne
+funktion. Ingen URL, filsti, rå billeder eller credentials accepteres. Op til 80
+positioner, radius 1–450 km, centrum ±85°/±180°, dataalder op til syv dage,
+hex-id på seks små hextegn og valgfri ICAO-kode med tre store bogstaver.
+`heading` er valgfri; `seen` er 0–60 sekunder. Tekstkaldesignal er højst 16 ASCII-tegn.
+Tryk på et fly leverer eventnavnet `select:<hex>`; zoom håndteres af core.
+
+Core begrænser PNG-input til 96 KiB pr. 256×256-kortflise og 64 KiB pr. logo
+(højst 512×512). PNG-integritet og udpakket størrelse kontrolleres. Der er højst
+otte synlige fliser, fire logoer i RAM og én aktiv mediejob. USB-statusfeltet
+`mediaBytes` viser de tilbageholdte billedbytes særskilt fra `memoryBytes` for Lua.
+Core reserverer persistent cache før en flisehentning, holder cache mindst syv
+dage, undlader prefetch og følger ikke redirects. Ingen lagerformatering.
+Ved stop frigives billeder; ved skjul annulleres jobs. Gamle resultater kasseres.

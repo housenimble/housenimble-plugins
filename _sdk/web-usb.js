@@ -59,7 +59,8 @@ export class LuaUsb {
   for(;;){try{status=await this.request('hello');break;}catch(error){if(this.closed||Date.now()>=until)throw error;}}
   if(status.protocol!==1||status.coreApi!==1||status.development!==true||(this.manifest.permissions?.network?.length&&status.capabilities?.httpFlight!==true))throw new Error('Skærmen kræver en kompatibel Lua-udviklings-core. Den nuværende firmware blev ikke ændret.');
   if(this.manifest.apiVersion!==1||this.manifest.permissions?.mqttSubscribe?.length||this.manifest.permissions?.mqttPublish?.length)throw new Error('Pluginet kræver host-understøttelse, som ikke er implementeret endnu.');
-  const origins=this.manifest.permissions?.network||[];if(origins.length&&(this.manifest.id!=='housenimble.flight'||origins.length!==1||origins[0]!=='https://opendata.adsb.fi'))throw new Error('Pluginets netværksadgang understøttes ikke af denne core.');
+  const origins=this.manifest.permissions?.network||[];if(origins.length&&(this.manifest.id!=='housenimble.flight'||!([["https://opendata.adsb.fi"],["https://opendata.adsb.fi","https://tile.openstreetmap.org","https://raw.githubusercontent.com"]].some(grant=>JSON.stringify(grant)===JSON.stringify(origins)))))throw new Error('Pluginets netværksadgang understøttes ikke af denne core.');
+  if(origins.length===3&&status.capabilities?.flightMedia!==1)throw new Error('Kort og logoer kræver en kompatibel core med flightMedia 1.');
   this.capabilities=status.capabilities||{};return status;
  }
  async pair(pin){

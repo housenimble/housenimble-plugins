@@ -24,3 +24,22 @@ class FlightConfigurationTests(unittest.TestCase):
         with self.assertRaises(hn.InvalidPlugin):hn.device_subset(manifest,files)
         manifest,files=hn.validate(ROOT/'spotify')
         with self.assertRaises(hn.InvalidPlugin):hn.device_subset(manifest,files)
+
+    def test_media_requires_exact_capability_before_pairing(self):
+        from unittest.mock import patch,Mock
+        from types import SimpleNamespace
+        manifest,_=hn.validate(ROOT/'flight')
+        for capability in (None,False,True,0,'1',2):
+            stream=Mock();peer=Mock();peer.hello.return_value={'capabilities':{'httpFlight':True,'settingsSchema':1,'flightMedia':capability}}
+            args=SimpleNamespace(port='synthetic',command='test',config_values=None)
+            with patch.object(hn,'open_serial',return_value=stream),patch.object(hn,'Device',return_value=peer):
+                with self.assertRaisesRegex(hn.DeviceError,'map/logo'):hn.run_device(args,b'fixture',manifest)
+            peer.pair.assert_not_called();peer.upload.assert_not_called();stream.close.assert_called_once()
+
+    def test_media_origins_are_exact_and_ordered(self):
+        import copy
+        manifest,files=hn.validate(ROOT/'flight')
+        for origins in ([*reversed(manifest['permissions']['network'])],manifest['permissions']['network'][:2],['https://opendata.adsb.fi','https://example.org']):
+            bad=copy.deepcopy(manifest);bad['permissions']['network']=origins
+            with self.assertRaises(hn.InvalidPlugin):hn.device_subset(bad,files)
+        manifest['permissions']['network']=['https://opendata.adsb.fi'];hn.device_subset(manifest,files)

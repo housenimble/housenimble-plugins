@@ -4,10 +4,9 @@ En selvstændig Lua-side, der henter fly i nærheden direkte fra
 [adsb.fi](https://adsb.fi/) gennem cores afgrænsede HTTPS-binding.
 Ingen Home API, database, login eller andre plugins er nødvendige.
 
-**Status 2026-10-26: klar til enhedstest med den nye Flight-kompatible udviklings-core.**
-Lua, den faktiske private loader/LVGL og firmwarebygning er verificeret lokalt.
-Pluginet og den nye core er **ikke installeret eller fysisk testet** på ejerens enhed.
-Den tidligere installerede counter-core understøtter ikke Flight-netværket.
+**Status 2026-11-09: version 0.2.0 med kort og logoer til software- og enhedstest.**
+Kræver en ejerinstalleret udviklings-core med `httpFlight=true` og `flightMedia=1`.
+Den nye medieudvidelse er endnu ikke fysisk testet eller udgivet til produktion.
 
 ## Visning og betjening
 
@@ -22,10 +21,17 @@ Den tidligere installerede counter-core understøtter ikke Flight-netværket.
   Det er ikke en garanti for alle eller de globalt nærmeste fly ved store områder.
 - Dansk/engelsk og synlig kildeangivelse.
 
-**Denne første Lua-version er en listevisning.** Kortfliser, ruteopslag,
-flyselskabslogoer og SD-billedcache fra den gamle native side er ikke porteret.
-De er ikke forudsætninger for live-listen og skal ikke vises som implementerede.
-Data kan være ufuldstændige og afhænger af modtagere og tjenestens dækning.
+Kortet viser flyenes positioner/retning, søgeområde og valgt fly. Tryk på et fly
+for at vælge det; +/− ændrer zoom. Listen kan rulles, mens de fire betjeningsknapper
+bliver stående. Flyselskabslogo udledes af et identificerbart ICAO-kaldesignal;
+ukendte eller manglende logoer erstattes af tekst, aldrig et opdigtet logo.
+Ruteopslag er ikke medtaget. Data afhænger af modtagere og tjenestens dækning.
+
+Core henter kun de synlige OpenStreetMap-fliser. En skrivbar SD-cache eller en
+allerede monterbar SPIFFS-partition er nødvendig til kortfliser; core formaterer
+ikke lager. Uden cache vises flyene på en tydeligt markeret radarbaggrund.
+Kort/logoer har egne grænser uden for Lua-RAM; cachefejl og manglende logoer
+stopper ikke flylisten. Cache beholdes mindst syv dage og har højst 32 pladser.
 
 ## Konfiguration
 
@@ -40,7 +46,7 @@ Gem eksempelvis denne **ikke-hemmelige** fil uden for Git som `flight-config.jso
 {"latitude":55.6761,"longitude":12.5683,"radius_km":30,"language":"da"}
 ```
 
-Hent/installer først en ejerautoriseret udviklings-core med capability `httpFlight`.
+Hent/installer først en ejerautoriseret udviklings-core med capabilities `httpFlight=true` og `flightMedia=1`.
 Testklienten kontrollerer dette før fysisk parring og afviser en ældre core:
 
 ```sh
@@ -55,10 +61,13 @@ konfigurationen leveres ved USB-test. Wi-Fi og generelle indstillinger ejes af c
 
 ## Afgrænset netværk
 
-Manifestet anmoder kun om `https://opendata.adsb.fi`. Core giver kun dette
+Manifestet anmoder om de tre præcise origins `https://opendata.adsb.fi`,
+`https://tile.openstreetmap.org` og `https://raw.githubusercontent.com`. Core giver kun dette
 plugin en anonym **GET**-adgang til `/api/v3/lat/LAT/lon/LON/dist/NM` med validerede
 koordinater/radius. Kilometer omregnes til NM. Ingen redirects, frie LAN-mål,
-credentials, cookies eller andre origins. Lua kan ikke tilføje headers eller token.
+credentials, cookies eller andre origins i Lua-HTTP-bindingen.
+Kort og logoer går gennem `ctx.ui.flight_map`, hvor core bygger de faste billed-URL’er.
+Lua kan ikke hente vilkårlige billeder eller se billedbytes/filstier. Lua kan ikke tilføje headers eller token.
 
 Netværksarbejdet kører uden for UI/Lua. Rå svardata, JSON, jobkø og leveret resultat
 har separate budgetter. Core leverer kun godkendte scalarfelter for op til 80 fly.
@@ -78,8 +87,8 @@ python3 _tools/hn.py pack flight --out /tmp/flight.hnplugin
 De offentlige tests kræver ingen privat core, fysisk enhed eller netværkskonto.
 De udfører den faktiske Lua-kode med syntetiske svar. Privat core har derudover
 testet samme offentlige Lua-pakke gennem sin reelle loader, JSON/config-binding
-og LVGL på to skærmstørrelser. En lokal modelkontrol med en frisk HTTPS-respons
-fra den offentlige kilde bestod også. Dette er ikke en fysisk test af ESP32-netværk.
+og LVGL på to skærmstørrelser. Kort/logo-tests bruger syntetiske billeder og flydata; de attesterer ikke fysisk
+ESP32-TLS, SD/SPIFFS eller berøring på den nye firmware. Dette er ikke en fysisk test af ESP32-netværk.
 
 ## Data og vilkår
 
@@ -104,3 +113,9 @@ Browsertransportens kontrakttest kan køres med Node 20+:
 ```sh
 node _tests/web/usb.mjs
 ```
+
+Kort: [OpenStreetMap](https://www.openstreetmap.org/copyright), med synlig
+kildeangivelse og [tilepolitik](https://operations.osmfoundation.org/policies/tiles/).
+Logoer hentes fra [airline-logos](https://github.com/sexym0nk3y/airline-logos)
+ved en fast revision. Billederne medfølger ikke pluginpakken; varemærker og
+billedrettigheder tilhører deres respektive ejere og dækkes ikke af pluginets MIT-licens.
