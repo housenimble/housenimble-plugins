@@ -1,5 +1,21 @@
 # HouseNimble plugins · setup til næste AI-session
 
+## Flight-udgivelse klargjort · 2026-11-09
+
+`codex/flight-release` fra dev `56e5a01` sætter kun Flight i katalogets
+installable-liste og fjerner det fra testable. Pakkens fire filer og det offentlige
+SDK er byteidentiske med den tidligere testede dev-kode. 31 offentlige tests,
+17 Flight-tests og pakkevalidering består. README og DEVICE-TEST beskriver den
+faktiske fysiske smoke-test samt udskudt Wi-Fi-udfald, cache-strømudfald og
+langtidstest. Det attesterer ikke disse udskudte prøver.
+
+Main er stadig den gamle bootstrap og mangler Flight-koden. Feature-PR skal
+følges gennem dev → test → main; metadatafeature alene ændrer ikke kataloget
+på den kørende hjemmeside. Webfeature codex/released-plugin-selection læser
+installable fra validerede snapshots og gør udgivelser valgbare i Mine opsætninger.
+Ingen privat core eller firmware er kopieret hertil, og ingen enhed er ændret.
+
+
 ## USB response framing - 2026-11-09
 
 Feature codex/usb-fragmented-replies starts from merged dev d0b2cd4.

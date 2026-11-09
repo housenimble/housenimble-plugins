@@ -4,13 +4,17 @@ Offentligt monorepo med én mappe pr. plugin. Core er en separat, privat
 kodebase. Dette repo indeholder **ingen core-kildekode,
 firmwarebinærer, private headers eller tidligere Git-historik**.
 
-**Aktuel status på `codex/flight-plugin`:** `counter/` kan valideres, pakkes og
-USB-testes med den ejerinstallerede udviklings-core. `flight/` er en faktisk Lua-
-side, softwareverificeret og klar til enhedstest med en **ny** core med
-`httpFlight=true` og `flightMedia=1`; den nye firmware er endnu ikke installeret. `spotify/` er en
-prototype, der stadig mangler OAuth-/host-understøttelse. De øvrige 20 mapper er
-migrationsspecifikationer. Ingen af disse udsagn er produktionsgodkendelser.
-Se [AI-SETUP.md](AI-SETUP.md) om de forskellige feature-branches.
+**Flight 0.2.0 er klargjort til udgivelse.** Det er et selvstændigt Lua-plugin
+med kort, flyvalg og logoer, fysisk afprøvet på Waveshare 7B / P4 revision 1.3.
+Se [testgrundlag og udskudte prøver](flight/DEVICE-TEST.md).
+`counter/` er et eksempel; `spotify/` kræver fortsat OAuth-/host-understøttelse.
+De øvrige mapper er migrationsspecifikationer, ikke udgivne Lua-plugins.
+
+`catalog.json` styrer udgivelsen: kun validerede mapper i `installable` vises som
+Udgivet. Nye kompatible udgivelser kan automatisk vælges i hjemmesidens Mine
+opsætninger, når main-kataloget og den tilhørende hjemmesideændring er aktiveret.
+Kataloget ændrer ikke allerede gemte pluginvalg. Udgivelse følger fortsat
+feature → dev → test → main; ingen branch er promoveret af denne ændring.
 
 ```sh
 python3 _tools/hn.py check counter

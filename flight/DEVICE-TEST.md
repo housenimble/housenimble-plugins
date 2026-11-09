@@ -1,6 +1,20 @@
 # Flight · softwareverifikation og fysisk enhedstest
 
-Status 2026-11-09: 0.2.0 med kort/logoer er softwaretestet; fysisk test mangler.
+Status 2026-11-09: Flight 0.2.0 er fysisk afprøvet som en afgrænset smoke-test.
+Pluginfilerne er byteidentiske med `38bcb8d98b99d19814131d24a7dfd252df50ebe9`;
+SDK'et er fra `f326564`. Den installerede ejer-godkendte core rapporterer build
+`2911e2dd17e578dc` på Waveshare 7B / ESP32-P4 revision 1.3.
+
+Ejeren bekræfter kort/fly, flyvalg, zoom og Flight/kort efter fysisk RESET.
+Tre USB-genindlæsninger med billeder samt stop/oprydning og automatisk
+sessionudløb er kontrolleret. Wi-Fi forblev tilsluttet ved kontrolpunkterne.
+Efter den efterfølgende læsende browser-chipaflæsning bekræfter ejeren igen
+Flight, og USB bekræfter samme build og tilsluttet Wi-Fi.
+
+Kontrolleret Wi-Fi-udfald/genforbindelse er udskudt efter ejerens ønske.
+Strømudfald under cache, individuel visuel kvittering for et bestemt logo og
+langtidstest er ikke attesteret. Andre skærmmodeller er ikke fysisk afprøvet.
+Katalogets udgivelsesstatus er ikke en påstand om disse manglende testresultater.
 
 - 17 offentlige Lua-tests: liste, dataalder, enheder, valg, kortdata, ICAO,
   manglende mediestøtte, rate-limit og annullering.
@@ -10,8 +24,7 @@ Status 2026-11-09: 0.2.0 med kort/logoer er softwaretestet; fysisk test mangler.
   billeddecoder med syntetiske billeder på 800×480 og 1024×600. Cache-/kø-/
   fejlsvar testes med kunstige platformadaptere. Ingen privat kilde medfølger her.
 
-**Fysisk TLS, SD/SPIFFS, hukommelse over tid, touch, offline/reconnect og genstart
-på denne nye core er ikke attesteret.** Gamle Counter-tests gælder ikke Flight.
+Gamle Counter-tests gælder ikke Flight; ovenstående Flight-resultater og begrænsninger er testgrundlaget.
 
 ## Fysisk forløb — kræver konkret ejeraccept
 
@@ -33,5 +46,6 @@ på denne nye core er ikke attesteret.** Gamle Counter-tests gælder ikke Flight
 8. Registrér præcis plugin-commit/pakkehash, core-version/API/capabilities,
    boardrevision og faktisk resultat. Del ikke private core-dumps, kode eller tokens.
 
-Ingen markering som Udgivet eller produktion før det faktiske testforløb og
-`dev` → `test` → `main` er gennemført. Se også [fælles procedure](../_sdk/DEVICE-TEST.md).
+Udgivelsen følger `dev` → `test` → `main` med ovenstående afgrænsede testgrundlag
+og de dokumenterede udskydelser. En metadataændring attesterer ikke nye fysiske
+prøver. Se også [fælles procedure](../_sdk/DEVICE-TEST.md).
