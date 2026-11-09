@@ -11,6 +11,7 @@ import time
 from validate_plugin import validate, package, InvalidPlugin
 from device import Device, DeviceError, open_serial
 from plugin_config import configure, ConfigurationError
+from consumption_config import validate as consumption_configuration
 
 
 def device_subset(manifest,payload):
@@ -21,7 +22,8 @@ def device_subset(manifest,payload):
     if any(permissions[k] for k in ['mqttSubscribe','mqttPublish']):
         raise InvalidPlugin('Development API 1 does not grant MQTT capabilities yet')
     flight=manifest['id']=='housenimble.flight'
-    if (flight and permissions['network'] not in (['https://opendata.adsb.fi'],['https://opendata.adsb.fi','https://tile.openstreetmap.org','https://raw.githubusercontent.com'])) or (not flight and permissions['network']):
+    consumption=manifest['id']=='housenimble.consumption'
+    if (flight and permissions['network'] not in (['https://opendata.adsb.fi'],['https://opendata.adsb.fi','https://tile.openstreetmap.org','https://raw.githubusercontent.com'])) or (not flight and not consumption and permissions['network']) or (consumption and permissions['network']!=['home-api:consumption']):
         raise InvalidPlugin('Only the explicit read-only Flight HTTP grant is supported; Spotify OAuth is not implemented')
     if permissions['storageBytes']>4096 or not 32768<=manifest['limits']['memoryBytes']<=262144 or manifest['limits']['instructionsPerCallback']<1000:
         raise InvalidPlugin('Development core supports 32–256 KiB Lua RAM, 1000–100000 instructions and up to 4 KiB storage')
@@ -65,6 +67,8 @@ def run_device(args, blob=None, manifest=None):
         capabilities=initial.get('capabilities') if isinstance(initial.get('capabilities'),dict) else {}
         if manifest and args.config_values is not None and capabilities.get('settingsSchema')!=1:
             raise DeviceError('Install an owner-approved core with configuration schema 1 first')
+        if manifest and manifest['id']=='housenimble.consumption' and (type(capabilities.get('consumptionData')) is not int or capabilities['consumptionData']!=1 or type(capabilities.get('pieChart')) is not int or capabilities['pieChart']!=1):
+            raise DeviceError('Install an owner-approved core with consumptionData 1 and pieChart 1 first')
         if manifest and manifest['id']=='housenimble.flight' and capabilities.get('httpFlight') is not True:
             raise DeviceError('Install an owner-approved core with Flight HTTP support first; this core cannot run Flight')
         if manifest and len(manifest['permissions']['network'])==3 and (type(capabilities.get('flightMedia')) is not int or capabilities['flightMedia']!=1):
@@ -137,6 +141,9 @@ def main():
                 try:args.config_values=configure(json.loads(dict(payload)['config.schema.json']),values)
                 except ConfigurationError as error:raise InvalidPlugin(str(error)) from error
                 if manifest['id']=='housenimble.flight':flight_configuration(args.config_values)
+            if manifest['id']=='housenimble.consumption':
+                if args.config_values is None:raise InvalidPlugin('Provide --config with your local Home API address')
+                consumption_configuration(args.config_values)
             if args.duration is not None and not 0<args.duration<=840:
                 raise InvalidPlugin('Duration must be between 0 and 840 seconds; a pairing expires after 15 minutes')
             device_subset(manifest,payload)

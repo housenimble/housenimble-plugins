@@ -3,11 +3,11 @@ import {readFile} from 'node:fs/promises';
 import {webcrypto} from 'node:crypto';
 globalThis.crypto??=webcrypto;
 const {LuaUsb}=await import('data:text/javascript;base64,'+Buffer.from(await readFile(new URL('../../_sdk/web-usb.js',import.meta.url))).toString('base64'));
-function fake({rejectChunk=false,capability=true,plugin="housenimble.flight",schema=1,media=1,silent=false}={}){
+function fake({rejectChunk=false,capability=true,plugin="housenimble.flight",schema=1,media=1,consumption=1,pie=1,silent=false}={}){
  let controller;const requests=[];let stopped=false;
  const port={readable:new ReadableStream({start(c){controller=c;}}),writable:new WritableStream({write(bytes){
   const m=JSON.parse(new TextDecoder().decode(bytes).slice(5));requests.push(m);if(silent)return;
-  const reply={id:m.id,ok:true,protocol:1,coreApi:1,development:true,capabilities:{httpFlight:capability,settingsSchema:schema,flightMedia:media}};
+  const reply={id:m.id,ok:true,protocol:1,coreApi:1,development:true,capabilities:{httpFlight:capability,settingsSchema:schema,flightMedia:media,consumptionData:consumption,pieChart:pie}};
   if(m.op==='pair')reply.token='a'.repeat(64);
   if(m.op==='chunk')reply.received=m.offset+Buffer.from(m.data,'base64').length-(rejectChunk?1:0);
   if(m.op==='commit'){reply.active=true;reply.plugin=plugin;}
@@ -22,7 +22,7 @@ function fake({rejectChunk=false,capability=true,plugin="housenimble.flight",sch
  assert.equal(await usb.close(),true);assert(port.stopped);assert.equal(usb.token,null);
 }
 {
- const port=fake({capability:false}),usb=new LuaUsb(port,{timeout:100});await usb.open();await assert.rejects(usb.hello({wait:0}),/udviklings-core/);assert(!port.requests.some(r=>r.op==='pair'||r.op==='begin'));await usb.close();
+ const port=fake({capability:false}),usb=new LuaUsb(port,{timeout:100});await usb.open();await assert.rejects(usb.hello({wait:0}),/Flight-understøttelse/);assert(!port.requests.some(r=>r.op==='pair'||r.op==='begin'));await usb.close();
 }
 {
  const port=fake({rejectChunk:true}),usb=new LuaUsb(port,{timeout:100});await usb.open();await usb.hello({wait:0});await usb.pair('123456');await assert.rejects(usb.upload(new Uint8Array(22),{}),/forkert antal/);assert(!port.requests.some(r=>r.op==='commit'));await usb.close();
@@ -46,3 +46,17 @@ for(const media of [null,0,true,'1',2,1]){
  assert(!port.requests.some(r=>r.op==='pair'||r.op==='begin'));await usb.close();
 }
 { const port=fake(),bad=structuredClone(flightMediaManifest);bad.permissions.network[2]='https://example.org';const usb=new LuaUsb(port,{manifest:bad});await usb.open();await assert.rejects(usb.hello({wait:0}),/netværksadgang/);await usb.close(); }
+
+const consumptionManifest={id:'housenimble.consumption',apiVersion:1,permissions:{network:['home-api:consumption'],mqttSubscribe:[],mqttPublish:[]}};
+for(const key of ['consumption','pie'])for(const version of [null,0,true,'1',2,1]){
+ const port=fake({[key]:version,capability:false}),usb=new LuaUsb(port,{manifest:consumptionManifest,timeout:100});await usb.open();
+ if(version===1)await usb.hello({wait:0});else await assert.rejects(usb.hello({wait:0}),/consumptionData/);
+ assert(!port.requests.some(r=>r.op==='pair'||r.op==='begin'));await usb.close();
+}
+{
+ const port=fake({plugin:consumptionManifest.id,capability:false}),usb=new LuaUsb(port,{manifest:consumptionManifest,timeout:100});await usb.open();await usb.hello({wait:0});await usb.pair('000001');
+ const cfg={country:'GLOBAL',language:'da',api_origin:'http://192.168.1.10:8111',currency:'DKK',refresh_seconds:60};
+ for(const api_origin of ['', 'http://127.0.0.1','http://192.168.1.10/path','http://192.168.001.10','http://192.168.1.10:0','http://user@192.168.1.10'])await assert.rejects(usb.upload(new Uint8Array(22),{...cfg,api_origin}),/Home API/);
+ assert(!port.requests.some(r=>r.op==='begin'));await usb.upload(new Uint8Array(22),cfg);assert.equal(port.requests.find(r=>r.op==='begin').config.api_origin,cfg.api_origin);await usb.close();
+}
+console.log('PASS: Consumption capabilities before pairing, closed service grant and bounded Home API settings before upload');

@@ -1,5 +1,21 @@
 # HouseNimble plugins · setup til næste AI-session
 
+## Forbrugsfordeling: softwaretestet kandidat · 2026-11-09
+
+Feature `codex/consumption-plugin` fra dev 5f56f97. Ejeren valgte eksisterende
+Home API som adapter; dette er en udtrykkelig undtagelse til den generelle
+målsætning om ingen obligatoriske interne Home API-afhængigheder. Ingen bestemt
+server er indbygget. Frisk Lua-kode med diagram/perioder og navngivet service;
+ingen privat C++ er kopieret hertil. Kataloget har Consumption i testable,
+installable fortsat kun Flight. Eksakt fysisk test og releaseaccept mangler.
+
+
+Verificeret lokalt: 35 offentlige regressions-/konfigurationstests, 21 faktiske
+Lua-tests med kunstig host, pakkevalidering og Node USB-kontrakt består.
+Kandidatens fire pakkefiler er byteidentiske med de offentlige fixtures, som
+web/core tester mod. Endelig fysisk test på præcist commit mangler.
+
+
 ## Flight-udgivelse klargjort · 2026-11-09
 
 `codex/flight-release` fra dev `56e5a01` sætter kun Flight i katalogets
