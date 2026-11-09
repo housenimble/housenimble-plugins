@@ -36,6 +36,11 @@ jobs:
           python3 -m unittest discover -s flight/tests -v
           python3 _tools/hn.py check flight
           python3 _tools/hn.py pack flight --out "$RUNNER_TEMP/flight.hnplugin"
+      - name: Test and package Consumption candidate offline
+        run: |
+          python3 -m unittest discover -s consumption/tests -v
+          python3 _tools/hn.py check consumption
+          python3 _tools/hn.py pack consumption --out "$RUNNER_TEMP/consumption.hnplugin"
       - uses: actions/setup-node@v4
         with:
           node-version: '22'

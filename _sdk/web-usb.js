@@ -21,6 +21,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 Public USB client only; no private core implementation. */
 const encoder=new TextEncoder();
+function consumptionConfiguration(config){
+ const keys=['api_origin','country','currency','language','refresh_seconds'];
+ if(Object.keys(config).sort().join(',')!==keys.join(',')||!['GLOBAL','DK','SE','DE'].includes(config.country)||!['da','en'].includes(config.language)||!['DKK','SEK','NOK','EUR','USD'].includes(config.currency)||!Number.isInteger(config.refresh_seconds)||config.refresh_seconds<30||config.refresh_seconds>3600)return false;
+ const match=typeof config.api_origin==='string'&&config.api_origin.length<=64&&/^http:\/\/([0-9]{1,3}(?:\.[0-9]{1,3}){3})(?::([1-9][0-9]{0,4}))?$/.exec(config.api_origin);
+ if(!match)return false;const octets=match[1].split('.').map(Number);
+ return octets.every((v,i)=>v<=255&&String(v)===match[1].split('.')[i])&&![0,255].includes(octets[3])&&(octets[0]===10||octets[0]===172&&octets[1]>=16&&octets[1]<=31||octets[0]===192&&octets[1]===168)&&(!match[2]||Number(match[2])<=65535);
+}
 export class LuaUsb {
  constructor(port,{timeout=5000,manifest={id:'housenimble.flight',apiVersion:1,permissions:{network:['https://opendata.adsb.fi'],mqttSubscribe:[],mqttPublish:[]}}}={}){this.manifest=manifest;this.port=port;this.timeout=timeout;this.sequence=0;this.token=null;this.pending=new Map();this.queue=Promise.resolve();this.queued=0;this.closed=true;}
  async open(){
@@ -57,9 +64,15 @@ export class LuaUsb {
  async hello({wait=20000}={}){
   const until=Date.now()+wait;let status;
   for(;;){try{status=await this.request('hello');break;}catch(error){if(this.closed||Date.now()>=until)throw error;}}
-  if(status.protocol!==1||status.coreApi!==1||status.development!==true||(this.manifest.permissions?.network?.length&&status.capabilities?.httpFlight!==true))throw new Error('Skærmen kræver en kompatibel Lua-udviklings-core. Den nuværende firmware blev ikke ændret.');
+  if(status.protocol!==1||status.coreApi!==1||status.development!==true)throw new Error('Skærmen kræver en kompatibel Lua-udviklings-core. Den nuværende firmware blev ikke ændret.');
   if(this.manifest.apiVersion!==1||this.manifest.permissions?.mqttSubscribe?.length||this.manifest.permissions?.mqttPublish?.length)throw new Error('Pluginet kræver host-understøttelse, som ikke er implementeret endnu.');
-  const origins=this.manifest.permissions?.network||[];if(origins.length&&(this.manifest.id!=='housenimble.flight'||!([["https://opendata.adsb.fi"],["https://opendata.adsb.fi","https://tile.openstreetmap.org","https://raw.githubusercontent.com"]].some(grant=>JSON.stringify(grant)===JSON.stringify(origins)))))throw new Error('Pluginets netværksadgang understøttes ikke af denne core.');
+  const origins=this.manifest.permissions?.network||[];
+  const consumption=this.manifest.id==='housenimble.consumption'&&JSON.stringify(origins)===JSON.stringify(['home-api:consumption']);
+  const flight=this.manifest.id==='housenimble.flight'&&[["https://opendata.adsb.fi"],["https://opendata.adsb.fi","https://tile.openstreetmap.org","https://raw.githubusercontent.com"]].some(grant=>JSON.stringify(grant)===JSON.stringify(origins));
+  if(this.manifest.id==='housenimble.consumption'&&!consumption)throw new Error('Forbrugsfordeling mangler sin Home API-tjeneste.');
+  if(origins.length&&!consumption&&!flight)throw new Error('Pluginets netværksadgang understøttes ikke af denne core.');
+  if(flight&&status.capabilities?.httpFlight!==true)throw new Error('Skærmen mangler Flight-understøttelse.');
+  if(consumption&&(status.capabilities?.consumptionData!==1||status.capabilities?.pieChart!==1))throw new Error('Forbrugsfordeling kræver en nyere core med consumptionData 1 og pieChart 1.');
   if(origins.length===3&&status.capabilities?.flightMedia!==1)throw new Error('Kort og logoer kræver en kompatibel core med flightMedia 1.');
   this.capabilities=status.capabilities||{};return status;
  }
@@ -72,6 +85,7 @@ export class LuaUsb {
   if(!this.token)throw new Error('Par USB-forbindelsen først.');
   if(!(bytes instanceof Uint8Array)||bytes.length<22||bytes.length>147456)throw new Error('Ugyldig pluginpakke.');
   if(!config||typeof config!=='object'||Array.isArray(config)||encoder.encode(JSON.stringify(config)).length>768)throw new Error('Ugyldige pluginindstillinger.');
+  if(this.manifest.id==='housenimble.consumption'&&!consumptionConfiguration(config))throw new Error('Angiv en gyldig lokal Home API-adresse og kontrollér indstillingerne for Forbrugsfordeling.');
   const hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)),b=>b.toString(16).padStart(2,'0')).join('');
   if(this.capabilities?.settingsSchema!==1&&this.manifest.id!=='housenimble.flight')throw new Error('Opdatér udviklings-core for at bruge generelle pluginindstillinger.');
   await this.request('begin',{size:bytes.length,sha256:hash,isolated:true,config});
