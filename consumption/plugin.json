@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "id": "housenimble.consumption",
+  "name": "Forbrugsfordeling",
+  "description": "Forbrug og pris fordelt på kategorier for dag, måned og år. Kræver konfigureret Home API på dit lokale netværk og en kompatibel core.",
+  "version": "0.1.0",
+  "apiVersion": 1,
+  "runtime": "lua-5.4",
+  "entry": "main.lua",
+  "license": "MIT",
+  "boards": [
+    "esp32-p4"
+  ],
+  "permissions": {
+    "network": [
+      "home-api:consumption"
+    ],
+    "mqttSubscribe": [],
+    "mqttPublish": [],
+    "storageBytes": 0
+  },
+  "limits": {
+    "memoryBytes": 262144,
+    "instructionsPerCallback": 100000,
+    "packageBytes": 65536
+  }
+}

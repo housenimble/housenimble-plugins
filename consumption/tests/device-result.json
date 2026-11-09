@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-09",
+  "plugin": "housenimble.consumption",
+  "version": "0.1.0",
+  "testedPluginCommit": "f43a07dab006277fd670321129a5041591dd15ae",
+  "packageSha256": "5c532aa91633177277b73068059abbcf52cd5a7e4a8fd3589b74318523f9b851",
+  "device": "Waveshare 7B / ESP32-P4 rev1.3",
+  "hostCapabilities": {
+    "consumptionData": 1,
+    "pieChart": 1,
+    "settingsSchema": 1
+  },
+  "dataSource": "owner-configured Home API",
+  "result": "passed-scoped-physical-smoke",
+  "ownerConfirmed": {
+    "chart": true,
+    "categories": true,
+    "kwh": true,
+    "day": true,
+    "month": true,
+    "year": true,
+    "previous": true,
+    "next": true,
+    "current": true,
+    "refresh": true,
+    "scroll": true,
+    "physicalReset": true
+  },
+  "usb": {
+    "paired": true,
+    "uploads": 2,
+    "stops": 2,
+    "luaBytesAfterEachStop": 0,
+    "mediaBytesAfterEachStop": 0,
+    "widgetsAfterEachStop": 0,
+    "wifiConnectedThroughout": true,
+    "bundledPluginRestored": true
+  },
+  "notPhysicallyVerified": [
+    "controlled-network-or-API-outage",
+    "power-loss",
+    "long-duration-run",
+    "unknown-price-and-negative-adjustment-display"
+  ],
+  "productionApproved": false
+}

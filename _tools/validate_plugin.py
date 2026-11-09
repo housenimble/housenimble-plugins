@@ -48,6 +48,9 @@ def validate(root):
         require(isinstance(permissions[key], list) and len(permissions[key]) <= 16 and all(isinstance(x,str) for x in permissions[key]), f'Invalid {key} permissions')
         require(len(set(permissions[key])) == len(permissions[key]), f'Duplicate {key} permission')
     for origin in permissions['network']:
+        if origin=='home-api:consumption':
+            require(manifest['id']=='housenimble.consumption' and permissions['network']==[origin], 'Consumption service grant is exclusive to its plugin')
+            continue
         parts = urlsplit(origin)
         try:
             port = parts.port
