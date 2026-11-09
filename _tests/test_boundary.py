@@ -3,6 +3,8 @@ from pathlib import Path
 import json
 import os
 import unittest
+import importlib.util
+import tempfile
 
 ROOT=Path(__file__).resolve().parents[1]
 
@@ -21,12 +23,28 @@ class PublicBoundary(unittest.TestCase):
                     self.assertFalse(p.is_symlink())
                     self.assertNotIn(p.suffix.lower(),forbidden)
 
-    def test_only_verified_flight_is_installable(self):
+    def test_only_verified_plugins_are_installable(self):
         catalog=json.loads((ROOT/'catalog.json').read_text())
-        self.assertEqual(catalog['installable'],['flight'])
-        self.assertTrue((ROOT/'flight/main.lua').is_file())
-        self.assertTrue((ROOT/'flight/plugin.json').is_file())
-        self.assertNotIn('flight',catalog['plannedPlugins'])
+        self.assertEqual(catalog['installable'],['flight','consumption'])
+        for name in catalog['installable']:
+            self.assertTrue((ROOT/name/'main.lua').is_file())
+            self.assertTrue((ROOT/name/'plugin.json').is_file())
+            self.assertNotIn(name,catalog['plannedPlugins'])
+        # Release metadata must still identify the exact physically attested
+        # public package. This checks integrity, not the truth of human evidence.
+        result=json.loads((ROOT/'consumption/tests/device-result.json').read_text())
+        self.assertEqual(result['result'],'passed-scoped-physical-smoke')
+        self.assertTrue(all(result['ownerConfirmed'].values()))
+        self.assertEqual(result['usb']['uploads'],2)
+        self.assertEqual(result['usb']['stops'],2)
+        for field in ['luaBytesAfterEachStop','mediaBytesAfterEachStop','widgetsAfterEachStop']:
+            self.assertEqual(result['usb'][field],0)
+        self.assertEqual(result['hostCapabilities'],dict(consumptionData=1,pieChart=1,settingsSchema=1))
+        spec=importlib.util.spec_from_file_location('release_package_validator',ROOT/'_tools/validate_plugin.py')
+        validator=importlib.util.module_from_spec(spec);spec.loader.exec_module(validator)
+        with tempfile.TemporaryDirectory() as folder:
+            digest=validator.package(ROOT/'consumption',Path(folder)/'consumption.hnplugin')
+        self.assertEqual(digest,result['packageSha256'])
         self.assertEqual(catalog['status'],'released')
         for name in catalog['plannedPlugins']:
             folder=ROOT/name
