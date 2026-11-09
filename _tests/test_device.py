@@ -52,6 +52,34 @@ class DeviceTests(unittest.TestCase):
         d.upload(payload,config=config)
         self.assertEqual(next(x for x in peer.calls if x['op']=='begin')['config'],config)
         self.assertEqual(bytes(peer.payload),payload)
+    def test_fragmented_replies_and_empty_reads_keep_the_same_request(self):
+        class Fragmented(Peer):
+            def write(self,data):
+                count=super().write(data);chunks=[]
+                for line in self.lines:
+                    for offset in range(0,len(line),3):
+                        chunks.extend([line[offset:offset+3],b''])
+                self.lines=chunks
+                return count
+        peer=Fragmented();d=device.Device(peer,timeout=0.02)
+        d.hello(ready_timeout=0.02);d.pair('123456');self.assertTrue(d.upload(b'x'*100)['active']);d.stop()
+        self.assertEqual([c['op'] for c in peer.calls],['hello','pair','begin','chunk','commit','stop'])
+
+    def test_fragmented_oversized_line_recovers_at_newline(self):
+        class Oversized(Peer):
+            def write(self,data):
+                count=super().write(data)
+                self.lines=[b'x'*1024,b'x'*1024,b'x'*500,b'\n']+self.lines
+                return count
+        self.assertTrue(device.Device(Oversized(),timeout=0.02).hello()['development'])
+
+    def test_incomplete_line_cannot_be_accepted_without_newline(self):
+        class Incomplete(Peer):
+            def write(self,data):
+                count=super().write(data);self.lines=[self.lines[-1].rstrip(b'\n')];return count
+        with self.assertRaises(device.DeviceTimeout):
+            device.Device(Incomplete(),timeout=0.001).request('hello')
+
     def test_unpaired_upload_never_sends(self):
         peer=Peer();d=device.Device(peer)
         with self.assertRaises(device.DeviceError):d.upload(b'x'*30)

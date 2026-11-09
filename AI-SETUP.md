@@ -1,5 +1,17 @@
 # HouseNimble plugins · setup til næste AI-session
 
+## USB response framing - 2026-11-09
+
+Feature codex/usb-fragmented-replies starts from merged dev d0b2cd4.
+The Python client now retains partial serial reads until newline, within the
+original request deadline and 2048-byte limit. Oversized lines are discarded
+through newline before recovery. Commands are not retried automatically.
+31 public tests pass, including fragmented replies/empty reads across pairing
+and upload, oversized fragmented input, and incomplete-line timeout. These
+use synthetic peers only. Physical SDK lifecycle confirmation is pending.
+Flight package bytes and firmware are unchanged.
+
+
 Statusdato: **2026-11-09**. Offentlig dokumentation uden core-implementation,
 credentials eller private enhedsdata. Commitreferencer er funktionelle milepæle
 før denne dokumentationsopdatering, ikke et løfte om nuværende HEAD eller release.

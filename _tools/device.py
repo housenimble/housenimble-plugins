@@ -33,10 +33,23 @@ class Device:
             if written!=len(payload):
                 raise DeviceError('Incomplete USB write')
             deadline=time.monotonic()+self.timeout
+            pending=bytearray();discarding=False
             while time.monotonic()<deadline:
-                line=self.stream.read_until(b'\n',2049)
-                if len(line)>2048:
+                fragment=self.stream.read_until(b'\n',2049)
+                if not fragment:
                     continue
+                if discarding:
+                    discarding=not fragment.endswith(b'\n')
+                    continue
+                if len(pending)+len(fragment)>2048:
+                    pending.clear();discarding=not fragment.endswith(b'\n')
+                    continue
+                pending.extend(fragment)
+                # Serial read_until may time out before the newline arrives.
+                # Keep bounded partial bytes within this request's original deadline.
+                if not pending.endswith(b'\n'):
+                    continue
+                line=bytes(pending);pending.clear()
                 start=line.find(PREFIX)
                 if start<0:
                     continue
