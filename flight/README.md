@@ -4,9 +4,9 @@ En selvstændig Lua-side, der henter fly i nærheden direkte fra
 [adsb.fi](https://adsb.fi/) gennem cores afgrænsede HTTPS-binding.
 Ingen Home API, database, login eller andre plugins er nødvendige.
 
-**Status 2026-11-09: version 0.2.0 med kort og logoer til software- og enhedstest.**
+**Version 0.2.0 er klargjort til udgivelse med kort og logoer.**
 Kræver en ejerinstalleret udviklings-core med `httpFlight=true` og `flightMedia=1`.
-Den nye medieudvidelse er endnu ikke fysisk testet eller udgivet til produktion.
+På Waveshare 7B / ESP32-P4 revision 1.3 er kort/fly, flyvalg, zoom, genstart og USB-genindlæsning afprøvet. Se [testgrundlag og begrænsninger](DEVICE-TEST.md). Udgivelsen bliver synlig fra main efter det normale PR-forløb.
 
 ## Visning og betjening
 

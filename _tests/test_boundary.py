@@ -21,10 +21,13 @@ class PublicBoundary(unittest.TestCase):
                     self.assertFalse(p.is_symlink())
                     self.assertNotIn(p.suffix.lower(),forbidden)
 
-    def test_no_port_is_claimed_to_be_installable(self):
+    def test_only_verified_flight_is_installable(self):
         catalog=json.loads((ROOT/'catalog.json').read_text())
-        self.assertEqual(catalog['installable'],[])
-        self.assertEqual(catalog['status'],'draft')
+        self.assertEqual(catalog['installable'],['flight'])
+        self.assertTrue((ROOT/'flight/main.lua').is_file())
+        self.assertTrue((ROOT/'flight/plugin.json').is_file())
+        self.assertNotIn('flight',catalog['plannedPlugins'])
+        self.assertEqual(catalog['status'],'released')
         for name in catalog['plannedPlugins']:
             folder=ROOT/name
             self.assertTrue((folder/'README.md').is_file())

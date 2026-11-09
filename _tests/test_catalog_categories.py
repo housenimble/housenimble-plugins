@@ -19,7 +19,7 @@ class CategoryConfiguration(unittest.TestCase):
                  and (p/'README.md').is_file() and (p/'config.schema.json').is_file()}
         self.assertEqual(set(members),folders)
         self.assertIn('counter',groups[-1]['plugins'])
-        self.assertEqual(catalog['installable'],[])
+        self.assertEqual(catalog['installable'],['flight'])
 
 
 if __name__=='__main__':

@@ -1,7 +1,9 @@
 {
   "schemaVersion": 1,
-  "status": "draft",
-  "installable": [],
+  "status": "released",
+  "installable": [
+    "flight"
+  ],
   "plannedPlugins": [
     "growatt",
     "calendar",
@@ -84,7 +86,5 @@
       ]
     }
   ],
-  "testable": [
-    "flight"
-  ]
+  "testable": []
 }
