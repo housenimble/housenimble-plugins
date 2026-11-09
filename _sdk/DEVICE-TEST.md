@@ -1,37 +1,62 @@
 # Ét plugin på en fysisk enhed
 
-**Forudsætning, endnu ikke implementeret:** enheden er provisioneret privat med
-udviklings-core, Lua-loader og autentificeret USB-testprotokol. Ingen offentlig
-core-download, privat checkout eller core-build kræves på pluginudviklerens computer.
-Core-installation er en særskilt, ejerstyret proces.
+Status 2026-10-26: offentlig USB-klient findes på `codex/lua-device-test` og er
+også genbrugt på `codex/flight-plugin`. Den separate kategoribranch har baseline-
+klienten. Kontrollér konkret checkout og [AI-SETUP.md](../AI-SETUP.md).
 
-1. Kør lokale parser-/UI-/kontrakttests. De erstatter ikke fysisk test.
-2. Valider og pak kun pluginets mappe. Uændret core bygges ikke igen.
-3. Aktivér udviklingstilstand fysisk på enheden og par USB-sessionen.
-4. Indlæs pakken i én reserveret, midlertidig testplads. Core afviser ukendt
-   API-version, board, filer, budget eller capabilities. Afbrudt upload aktiverer
-   aldrig en halv pakke.
-5. Testprofilen består af core og dette ene plugin. Andre offentlige plugins
-   installeres ikke; på en eksisterende enhed skal de kunne suspenderes under testen.
-6. Kontrollér fysisk touch, korrekt visning, offline, reconnect, timeout,
-   ugyldigt JSON, tomme/store svar, fuldt lager og gentagen indlæsning/fjernelse.
-7. Test et bevidst Lua-loop, for stort svar og callback efter fjernelse. Core
-   skal afslutte pluginet, rydde egne ressourcer og bevare netværks-/core-startsiden.
-8. Stop testen og kontrollér oprydning. En genstart skal deaktivere en fejlende
-   midlertidig pakke, ikke starte en crash-løkke.
-9. Gem pluginversion/hash, core-API-version, core-build-id, chiprevision,
-   testtrin og resultat. Del kun pluginets redigerede logs, aldrig ELF,
-   core-dumps, nøgler eller core-kilde.
+Pluginudvikleren skal kun have det offentlige repo, Python/USB-klienten og en
+ejerprovisioneret enhed. Privat core-kilde eller core-genbygning kræves ikke for
+hver pluginprøve. En ny host-capability kan kræve en separat, godkendt core-opdatering.
 
-Foreslået CLI, når loaderen er bygget:
+## Lokal validering og pakning
 
-```text
-hn device pair --usb
-hn plugin test ./growatt --usb --isolated
-hn plugin logs growatt --usb
-hn plugin stop --usb
+```sh
+python3 _tools/hn.py check counter
+python3 _tools/hn.py pack counter --out /tmp/counter.hnplugin
+python3 -m unittest discover -s _tests -v
 ```
 
-Disse enhedskommandoer er endnu ikke implementeret. Den medfølgende `hn.py`
-understøtter kun lokal `check` og `pack`; `test` afviser uden at kontakte enheden.
-Godkendt produktionsinstallation/signaturkontrol er separat fra midlertidig udviklingstest.
+Pakning eksekverer ikke Lua og beviser ikke hardware-/host-understøttelse.
+
+## Fysisk test — kræver konkret ejeraccept
+
+```sh
+python3 -m pip install -r _tools/requirements.txt
+python3 _tools/hn.py test counter --port <USB-port> --isolated --duration 840
+```
+
+Klienten kræver dev-protokol/API 1. Tryk fysisk “USB · par enhed” og indtast en
+frisk sekscifret kode. Sessionstoken holdes kun i RAM. Klienten holder lease aktiv
+og stopper pluginet efter testen/Ctrl-C; core stopper også ved manglende heartbeat.
+Der indlæses kun den valgte pakke, ikke alle pluginmapper.
+
+Flight kræver den nye `httpFlight` capability og en faktisk Flight-kompatibel core.
+Klienten afviser den gamle counter-core, før parring/upload foreslås:
+
+```sh
+python3 _tools/hn.py test flight --port <USB-port> --isolated --duration 840 --config /sti/flight-config.json
+```
+
+`--config` er valgfrit, ikke-hemmeligt og gælder kun Flight; core validerer værdierne
+igen. Se [Flight](../flight/README.md). Spotify kan ikke få Flight-granten til at
+virke som OAuth/player-skrivning. MQTT, fri HTTP/LAN og større UI-funktioner er ikke
+derfor tildelt. Hostens capability/grants er afgørende, ikke kun manifestets anmodning.
+
+## Checkliste
+
+1. Registrér præcis plugin-commit/pakkehash, core-version/API/capabilities og hardware.
+2. Test kun det valgte plugin med fysisk touch og faktisk data. Opstart må ikke sende uønskede writes.
+3. Kontrollér fejl/timeouts/tomme/ugyldige/store svar og rate-limit med fixtures.
+4. Kontrollér offline/reconnect og dataalder. En simulatortest erstatter ikke fysisk netværk.
+5. Skjul/stop/genindlæs og kontrollér oprydning, gamle callbacks og fortsat core/Wi-Fi.
+6. Prøv sessionudløb og genstart; et midlertidigt plugin må ikke autoindlæses i en crash-løkke.
+7. Gem redigeret testresultat; aldrig credentials, parringskoder eller private core-dumps/builds.
+
+Den tidligere tæller-smoke er ikke en fysisk Flight-test eller en generel
+produktionsgodkendelse. Hver port har egen DEVICE-TEST.md. Godkendt produktion,
+signaturkontrol og `dev` → `test` → `main` er særskilte trin.
+
+
+## Fælles udviklingsstandard
+
+Se [udviklingsstandarden](DEVELOPMENT.md) for individuel USB-test, generisk konfiguration og samme pakke i firmwarebygninger gennem hjemmesiden.

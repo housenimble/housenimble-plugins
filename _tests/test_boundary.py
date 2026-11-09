@@ -11,8 +11,9 @@ class PublicBoundary(unittest.TestCase):
         forbidden={'.c','.cc','.cpp','.h','.hpp','.o','.a','.bin','.elf','.map','.pem','.key'}
         for directory, folders, files in os.walk(ROOT, followlinks=False):
             # This checkout owns its root Git database; copied/nested history is forbidden.
-            if Path(directory) == ROOT and '.git' in folders:
-                folders.remove('.git')
+            if Path(directory) == ROOT:
+                if '.git' in folders:folders.remove('.git')
+                if '.git' in files:files.remove('.git')
             for name in folders + files:
                 p = Path(directory) / name
                 with self.subTest(path=str(p.relative_to(ROOT))):
