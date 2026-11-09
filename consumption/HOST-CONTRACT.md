@@ -1,8 +1,10 @@
 # Consumption data service · version 1 (candidate)
 
-This is a public interface proposal implemented alongside a private core change.
-It does not grant access on existing Flight-only firmware. The catalog stays
-testable, not installable until exact-commit hardware testing and release approval.
+This public interface is implemented alongside a separately provisioned private
+host. It does not grant access on existing Flight-only firmware. A scoped
+physical smoke test has passed for the exact package in DEVICE-TEST.md.
+The feature catalog is prepared for release; promotion and production approval
+remain separate. This does not attest a later test-branch commit.
 
 The owner selected their existing Home API. A new installation supplies its own
 `api_origin`, an explicit `http://` RFC1918 IPv4 address and optional port. There

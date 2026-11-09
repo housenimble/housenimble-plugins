@@ -2,7 +2,8 @@
   "schemaVersion": 1,
   "status": "released",
   "installable": [
-    "flight"
+    "flight",
+    "consumption"
   ],
   "plannedPlugins": [
     "growatt",
@@ -85,7 +86,5 @@
       ]
     }
   ],
-  "testable": [
-    "consumption"
-  ]
+  "testable": []
 }

@@ -1,8 +1,24 @@
 # Test: Forbrugsfordeling 0.1.0
 
-Status: softwaretestet kandidat; ingen fysisk Consumption-test eller udgivelse.
-Ejeren har valgt eksisterende Home API. Den tidligere Flight-test attesterer
-ikke denne nye tjeneste eller renderer.
+Status: afgrænset fysisk smoke-test bestået; udgivelse klargjort, ikke publiceret.
+Ejeren har valgt eksisterende Home API. Se det redigerede
+[testresultat](tests/device-result.json).
+
+Præcis plugin-SHA `f43a07dab006277fd670321129a5041591dd15ae`, pakke-SHA-256
+`5c532aa91633177277b73068059abbcf52cd5a7e4a8fd3589b74318523f9b851`, på
+Waveshare 7B / ESP32-P4 rev1.3 med separat ejerprovisioneret core, der annoncerer
+consumptionData=1/pieChart=1/settingsSchema=1. Ejeren bekræfter diagram,
+kategorier, kWh, alle syv periode-/opdateringsknapper og rulning. Efter fysisk
+RESET/RST kom diagram og data normalt tilbage.
+
+Fysisk parring og to USB-indlæsninger består. Ved begge stop var Lua-RAM,
+billed-RAM og widgets nul, Wi-Fi forblev tilsluttet, og den indbyggede
+Forbrugsfordeling er startet igen. Den midlertidige USB-prøve skrev ingen
+firmware. Testen attesterer kun den præcise pakke og dette afgrænsede forløb.
+Netværks-/API-udfald, strømudfald, langtid og særskilt visuel kontrol af ukendt
+pris/negative korrektioner er ikke fysisk prøvet. Softwareprøverne nedenfor
+attesterer ikke disse fysiske scenarier. Ingen målinger, adresser, tokens,
+private firmwarefiler eller rå logs medtages i resultatet.
 
 Lokale tests med kunstige data:
 
@@ -21,8 +37,9 @@ perioder, fejl, skjulte sider, genindlæsning og sene svar. USB-klienterne afvis
 ældre core før parring/upload. Private core-tests og kompilering foregår separat;
 core-kilde, firmware og private logs lægges aldrig i dette repo.
 
-Før udgivelse skal en præcis plugin-SHA og kompatibel core-SHA prøves på den
-fysiske skærm efter ejerens særskilte accept. Bevar app-backup, Wi-Fi, NVS og
+Ved senere kandidater skal en præcis plugin-SHA og kompatibel core prøves på
+den fysiske skærm efter ejerens særskilte accept. Den eksisterende smoke-test
+godkender ikke automatisk en ny test-branch eller release. Bevar app-backup, Wi-Fi, NVS og
 partitioner. Brug fysisk USB-parring og en lokal runtime-konfiguration med
 korrekt api_origin; læg ikke den rigtige adresse eller målinger i Git.
 

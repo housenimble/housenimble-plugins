@@ -1,5 +1,26 @@
 # HouseNimble plugins · setup til næste AI-session
 
+## Consumption: fysisk smoke-test og releasekandidat · 2026-11-09
+
+Offentlig kode f43a07dab006277fd670321129a5041591dd15ae og pakke
+5c532aa91633177277b73068059abbcf52cd5a7e4a8fd3589b74318523f9b851 er fysisk
+prøvet på Waveshare 7B / P4 rev1.3 med separat ejerprovisioneret kompatibel core.
+Ejeren bekræfter diagram, kategorier, kWh, alle periode-/opdateringsknapper,
+rulning og normal tilbagekomst efter fysisk reset. Parret USB-lifecycle har to
+indlæsninger og to stop med nul Lua-/billed-RAM/widgets, tilsluttet Wi-Fi og
+indbygget plugin startet igen. DEVICE-TEST og tests/device-result.json beskriver
+afgrænsningen; netværksudfald, strømudfald og langtid er ikke fysisk attesteret.
+
+Kun katalog, testnotater og kategoritestens forventede udgivelser er ændret efter
+kodecommitten. De fire pakkefiler og SDK er byteidentiske. Featurekataloget har
+nu Flight og Consumption i installable; dette er klargøring, ikke en merge til
+main eller deploy. PR9 mod dev opdateres; en senere frosset test-commit skal
+verificeres særskilt før produktionspromotion. Web PR44 og ny privat bygger er
+nødvendige for korrekt understøttelse. Den kørende server er fortsat web 1.4.0.
+Ingen privat core, firmware, målinger eller credentials er kopieret hertil.
+Ældre kandidatnoter nedenfor er historik.
+
+
 ## Forbrugsfordeling: softwaretestet kandidat · 2026-11-09
 
 Feature `codex/consumption-plugin` fra dev 5f56f97. Ejeren valgte eksisterende

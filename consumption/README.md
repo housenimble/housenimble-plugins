@@ -1,14 +1,16 @@
 # Forbrugsfordeling
 
-Lua-kandidat, version 0.1.0. Viser dit Home API's faktiske forbrug fordelt på
+Lua-plugin, version 0.1.0, klargjort til udgivelse. Viser dit Home API's faktiske forbrug fordelt på
 kategorier med cirkeldiagram, kWh, andele og pris. Vælg dag, måned eller år,
 gå til forrige/næste periode, eller vend tilbage til den aktuelle periode.
 Diagrammets liste kan rulles, så alle kategorier kan læses.
 
-**Ikke udgivet endnu.** Kataloget markerer kandidaten som `testable`, ikke
-`installable`. Eksisterende Flight-core understøtter ikke den nye datatjeneste
-eller cirkeldiagram. Der kræves særskilt godkendt core med `consumptionData=1`,
-`pieChart=1` og en afsluttende fysisk test før udgivelse.
+**Klargjort til udgivelse.** Featurekataloget medtager nu Consumption i
+`installable` efter den afgrænsede fysiske smoke-test. Dette er ikke en
+oplysning om, at featurebranchen er promoveret eller hjemmesiden opdateret.
+Eksisterende Flight-core mangler datatjenesten og cirkeldiagrammet; der kræves
+en separat ejerprovisioneret core med `consumptionData=1` og `pieChart=1`.
+Se [præcise versioner og testens afgrænsning](DEVICE-TEST.md).
 
 Ejeren har valgt sit eksisterende Home API som første datakilde. Angiv selv
 serverens lokale adresse i `api_origin`, eksempelvis `http://192.168.1.10:8111`.
@@ -34,7 +36,7 @@ Core anvender sin egen dato/tidszone og afviser fremtidige perioder. Der er
 plads til 32 kategorier; overskridelse afvises frem for skjult frasortering.
 
 [Konfiguration](config.schema.json) · [offentlig host-kontrakt](HOST-CONTRACT.md)
-· [test og manglende fysisk verifikation](DEVICE-TEST.md).
+· [testresultat og afgrænsning](DEVICE-TEST.md).
 
 Land kan vælges som GLOBAL, DK, SE eller DE. Det er et opsætningsvalg, ikke en
 påstand om færdig integration med alle lokale energiselskaber.
