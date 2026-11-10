@@ -76,3 +76,13 @@ Kort kræver skrivbart cachelager uden formatering. Spotify OAuth aktiveres ikke
 ## Fælles udviklingsstandard
 
 Se [SDK-vejledningen](_sdk/DEVELOPMENT.md) for individuel USB-test, generisk konfiguration og samme pakke i firmwarebygninger gennem hjemmesiden.
+
+## Forbrugsfordeling · klargjort til udgivelse
+
+`consumption/` har nu en selvstændig Lua-kandidat med brugerens valgte Home API,
+cirkeldiagram, perioder, kWh og pris. Featurekataloget klargør den til udgivelse
+efter fysisk smoke-test. Den kræver ny core med `consumptionData=1` og
+`pieChart=1`; den ældre Flight-core kan ikke køre den. Promotion og serveropdatering
+mangler fortsat. Se [opsætning](consumption/README.md) og
+[testgrundlag](consumption/DEVICE-TEST.md). Den tidligere interne, fastkodede
+server er ikke indbygget i Lua-pluginet.

@@ -22,6 +22,33 @@
         "en"
       ],
       "default": "da"
+    },
+    "api_origin": {
+      "type": "string",
+      "title": "Home API-adresse",
+      "description": "HTTP-adresse til dit Home API på det lokale netværk, uden sti eller login. Fx http://192.168.1.10:8111",
+      "maxLength": 64,
+      "default": ""
+    },
+    "currency": {
+      "type": "string",
+      "title": "Valuta i API-data",
+      "description": "Vælg den valuta, API-priserne allerede bruger. Der omregnes ikke.",
+      "enum": [
+        "DKK",
+        "SEK",
+        "NOK",
+        "EUR",
+        "USD"
+      ],
+      "default": "DKK"
+    },
+    "refresh_seconds": {
+      "type": "integer",
+      "title": "Opdatering hvert (sekunder)",
+      "minimum": 30,
+      "maximum": 3600,
+      "default": 60
     }
   }
 }

@@ -49,3 +49,10 @@ trinvis portering; mapperne alene gør ikke nuværende C++-plugins isolerede.
 `flightMedia=1` tilføjer kun den afgrænsede Flight-kortfunktion, ikke en generel
 billed-/fil-/HTTP-grant. Se [Flight-kontrakten](../flight/HOST-CONTRACT.md).
 Version 0.2 kræver en separat godkendt core-opdatering og ny fysisk test.
+
+## Forbrugsfordeling · tjenesteversion 1, kandidat
+
+Den nye kandidat beskrives i [Consumption-kontrakten](../consumption/HOST-CONTRACT.md).
+`home-api:consumption` er et eksklusivt navngivet servicegrant, ikke en generel
+HTTP-origin. USB kræver `consumptionData=1` og `pieChart=1` før parring/upload.
+Den nye kontrakt giver ikke eksisterende firmware disse capabilities.

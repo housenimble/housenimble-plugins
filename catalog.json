@@ -2,7 +2,8 @@
   "schemaVersion": 1,
   "status": "released",
   "installable": [
-    "flight"
+    "flight",
+    "consumption"
   ],
   "plannedPlugins": [
     "growatt",
@@ -12,7 +13,6 @@
     "live_power",
     "watts_live",
     "top_consumers",
-    "consumption",
     "power_prices",
     "electricity",
     "dishwasher",
